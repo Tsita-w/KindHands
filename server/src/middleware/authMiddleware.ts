@@ -1,11 +1,8 @@
-// src/middleware/authMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { AuthRequest } from "../types/AuthRequest";
 
-// Extend Request interface to include user
-export interface AuthRequest extends Request {
-  user?: any;
-}
+
 
 export const protect = (req: AuthRequest, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.split(' ')[1]; // Extract token from "Bearer <token>"
@@ -21,4 +18,14 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction) => 
   } catch (err) {
     res.status(401).json({ message: 'Token is not valid' });
   }
+};
+
+export const authorizeRoles = (roles: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    // Check if user exists and has a role
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Forbidden: You do not have the required role' });
+    }
+    next(); // User has the required role, proceed
+  };
 };
