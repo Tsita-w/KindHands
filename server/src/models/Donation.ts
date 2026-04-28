@@ -1,48 +1,38 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IDonation extends Document {
-  title: string;
-  description: string;
-  category: "clothes" | "food" | "money" ;
-  condition: "new" | "used" | "damaged";
-  images: string[];
   donor: mongoose.Types.ObjectId;
-  pickup: boolean;
+  itemType: 'money' | 'clothes' | 'food' | 'other';
+  description: string;
+  quantity?: number;
+  status: 'pending' | 'collected' | 'delivered';
   location: string;
+  pickup: boolean;
 }
 
-const donationSchema = new mongoose.Schema<IDonation>(
-  {
-    title: String,
-    description: String,
+const DonationSchema: Schema = new Schema({
+  donor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 
-    category: {
-      type: String,
-      enum: ["clothes", "food", "money"],
-    },
-
-    condition: {
-      type: String,
-      enum: ["new", "used", "damaged"],
-    },
-
-    images: [String],
-
-    donor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-
-    pickup: {
-      type: Boolean,
-      default: true,
-    },
-
-    location: {
-      type: String,
-    },
+  itemType: {
+    type: String,
+    enum: ['money', 'clothes', 'food', 'other'],
+    required: true
   },
-  { timestamps: true }
-);
 
-export default mongoose.model<IDonation>("Donation", donationSchema);
+  description: { type: String, required: true },
+
+  quantity: { type: Number },
+
+  status: {
+    type: String,
+    enum: ['pending', 'collected', 'delivered'],
+    default: 'pending'
+  },
+
+  location: { type: String, required: true },
+
+  pickup: { type: Boolean, default: true }
+
+}, { timestamps: true });
+
+export default mongoose.model<IDonation>('Donation', DonationSchema);
